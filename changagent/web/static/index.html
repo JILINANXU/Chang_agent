@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>畅Agent · 本地编码智能体</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234d8dff'/%3E%3Ctext x='16' y='23' font-size='19' font-family='Segoe UI,sans-serif' font-weight='700' fill='%23fff' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">畅</div>
+    <div class="brand-text">
+      <strong>畅Agent</strong>
+      <span>本地编码智能体</span>
+    </div>
+  </div>
+
+  <div class="topbar-meta">
+    <div class="meta-item" title="沙箱根目录：所有文件操作都被限制在这里面">
+      <span class="meta-label">工作区</span>
+      <code id="workspace-path">读取中…</code>
+    </div>
+    <div class="meta-item" title="当前使用的模型">
+      <span class="meta-label">模型</span>
+      <code id="model-name">—</code>
+    </div>
+    <span class="badge" id="mode-badge">…</span>
+    <a class="btn-ghost btn-link" href="/guide" title="用法、模式、安全边界与常见问题">说明</a>
+    <button class="btn-ghost" id="reset-btn" title="清空当前对话">重置</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- 左侧：工作区文件 + 示例任务 -->
+  <aside class="sidebar">
+    <section class="side-block side-block--grow">
+      <h2 class="side-title">
+        <span>工作区文件</span>
+        <span class="pill" id="file-count">0</span>
+      </h2>
+      <div class="file-tree" id="file-tree">
+        <div class="side-empty">读取中…</div>
+      </div>
+    </section>
+
+    <section class="side-block">
+      <h2 class="side-title"><span>示例任务</span></h2>
+      <div class="quick-list" id="quick-list"></div>
+    </section>
+  </aside>
+
+  <!-- 中间：对话流 + 输入区 -->
+  <main class="main">
+    <div class="stream" id="stream"></div>
+
+    <footer class="composer">
+      <div class="composer-box">
+        <textarea id="task-input" rows="1" spellcheck="false"
+          placeholder="描述你想让 Agent 做什么，例如：在 hello.py 中新增 greet 函数"></textarea>
+        <button id="run-btn" class="btn-primary" title="运行（Ctrl + Enter）">
+          <span class="btn-label">运行</span>
+        </button>
+      </div>
+      <div class="composer-hint">
+        <span>Enter 换行 · Ctrl + Enter 运行</span>
+        <span id="run-status"></span>
+      </div>
+    </footer>
+  </main>
+
+  <!-- 右侧：文件变更 + 运行统计 -->
+  <aside class="aside">
+    <section class="side-block side-block--grow">
+      <h2 class="side-title">
+        <span>文件变更</span>
+        <span class="pill" id="change-count">0</span>
+      </h2>
+      <div class="change-list" id="change-list">
+        <div class="side-empty">本次运行还没有改动</div>
+      </div>
+    </section>
+
+    <section class="side-block">
+      <h2 class="side-title"><span>本次运行</span></h2>
+      <dl class="stats" id="run-stats">
+        <div class="stat"><dt>状态</dt><dd id="stat-state">待运行</dd></div>
+        <div class="stat"><dt>步数</dt><dd id="stat-steps">—</dd></div>
+        <div class="stat"><dt>工具调用</dt><dd id="stat-tools">—</dd></div>
+        <div class="stat"><dt>耗时</dt><dd id="stat-elapsed">—</dd></div>
+      </dl>
+    </section>
+  </aside>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

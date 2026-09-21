@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>畅Agent · 使用说明</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234d8dff'/%3E%3Ctext x='16' y='23' font-size='19' font-family='Segoe UI,sans-serif' font-weight='700' fill='%23fff' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
+</head>
+<body class="doc-page">
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">畅</div>
+    <div class="brand-text">
+      <strong>畅Agent</strong>
+      <span>使用说明</span>
+    </div>
+  </div>
+
+  <div class="topbar-meta">
+    <span class="badge" id="mode-badge">…</span>
+    <a class="btn-ghost btn-link" href="/">返回工作台</a>
+  </div>
+</header>
+
+<div class="doc-wrap">
+
+  <nav class="doc-toc">
+    <h2>目录</h2>
+    <ol>
+      <li><a href="#what">它是什么</a></li>
+      <li><a href="#start">快速开始</a></li>
+      <li><a href="#mode">两种模式</a></li>
+      <li><a href="#ui">界面导览</a></li>
+      <li><a href="#tools">它能做什么</a></li>
+      <li><a href="#safety">安全边界与回滚</a></li>
+      <li><a href="#config">配置项一览</a></li>
+      <li><a href="#faq">常见问题</a></li>
+      <li><a href="#layout">目录与产物</a></li>
+    </ol>
+  </nav>
+
+  <article class="doc">
+
+    <h1>畅Agent 使用说明</h1>
+    <p class="doc-lead">
+      一个跑在你自己电脑上的编码智能体：你用中文描述要改什么，它自己读文件、改代码，并把每一步都摊开给你看。
+      全部文件操作都限制在你指定的工作区里，改动前先备份。
+    </p>
+
+    <!-- 1 -->
+    <section id="what">
+      <h2>1. 它是什么</h2>
+      <p>畅Agent 不是聊天机器人，而是一个「会动文件」的执行器。它的工作循环是：</p>
+      <ol class="doc-steps">
+        <li><strong>思考</strong> —— 根据你的需求决定下一步做什么；</li>
+        <li><strong>调用工具</strong> —— 列目录、读文件、搜索、改文件；</li>
+        <li><strong>观察结果</strong> —— 看到工具返回后继续下一步，直到任务完成；</li>
+        <li><strong>汇报</strong> —— 给出最终答复，并列出改过哪些文件。</li>
+      </ol>
+      <p class="doc-note">
+        整个过程通过 SSE 实时推送到页面，所以你能看到它「正在做什么」，而不是干等一个结果。
+      </p>
+    </section>
+
+    <!-- 2 -->
+    <section id="start">
+      <h2>2. 快速开始</h2>
+      <p>在项目根目录执行一条命令：</p>
+      <pre><code>python run.py</code></pre>
+      <p>它会自动完成四件事：检查 Python 版本、补齐缺失依赖、读取配置、启动服务并打开浏览器（默认
+        <code>http://127.0.0.1:8765</code>，端口被占用会自动顺延）。</p>
+
+      <p>常用参数：</p>
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>python run.py --port 9000</code></td><td>指定端口</td></tr>
+          <tr><td><code>python run.py --no-browser</code></td><td>只起服务，不开浏览器</td></tr>
+          <tr><td><code>python run.py --reload</code></td><td>开发模式：改代码自动重启</td></tr>
+          <tr><td><code>python -m changagent --check</code></td><td>命令行查看当前配置与工具清单（不调用模型）</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 3 -->
+    <section id="mode">
+      <h2>3. 两种模式</h2>
+      <p>顶栏右上角的徽章会告诉你当前处于哪种模式：</p>
+
+      <div class="doc-cards">
+        <div class="doc-card">
+          <h3>演示模式 <span class="badge">灰色</span></h3>
+          <p>播放一段预置的完整工作流，用来熟悉界面。<strong>不调用任何模型，不消耗额度，也不改动文件</strong>。</p>
+          <p class="doc-dim">适用于：第一次打开、给别人演示、排查界面问题。</p>
+        </div>
+        <div class="doc-card">
+          <h3>真实模式 <span class="badge is-live">绿色</span></h3>
+          <p>接入真实模型，事件来自 Agent 内核，会真实读写工作区里的文件。</p>
+          <p class="doc-dim">适用于：真正干活。</p>
+        </div>
+      </div>
+
+      <p>切换方式是在项目根的 <code>.env</code> 里设置：</p>
+      <pre><code>CHANG_AGENT_WEB_MODE=live
+CHANG_AGENT_API_KEY=你的密钥
+CHANG_AGENT_BASE_URL=https://api.agnes-ai.cn/v1
+CHANG_AGENT_MODEL=agnes-2.5-flash</code></pre>
+      <p class="doc-note">
+        真实模式的两个前提是 <strong>有 API Key</strong> 且 <strong>装了 openai 库</strong>；
+        任一不满足，启动口会自动退回演示模式并在终端说明原因，不会白屏报错。
+      </p>
+    </section>
+
+    <!-- 4 -->
+    <section id="ui">
+      <h2>4. 界面导览</h2>
+      <table>
+        <thead><tr><th>区域</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>顶栏</td><td>工作区路径、当前模型、模式徽章、重置按钮</td></tr>
+          <tr><td>左栏</td><td>工作区文件树（只读展示）、示例任务（点击即填入输入框）</td></tr>
+          <tr><td>中栏</td><td>对话流：你的需求 → 思考 → 工具卡片 → 文件改动 → 最终答复；底部是输入区</td></tr>
+          <tr><td>右栏</td><td>文件变更列表（含逐行 diff）、本次运行统计（状态 / 步数 / 工具调用 / 耗时）</td></tr>
+        </tbody>
+      </table>
+
+      <p>几个好用的细节：</p>
+      <ul>
+        <li><code>Ctrl + Enter</code> 运行；运行中输入框仍可编辑，按钮会变成「停止」；</li>
+        <li>工具卡片点标题栏可折叠，结果超过 28 行会自动收起；</li>
+        <li>对话流智能滚动：你手动往上翻之后，它不会再强行拽到底部；</li>
+        <li>窗口变窄时右栏、左栏会依次收起，diff 在对话流里依然可见。</li>
+      </ul>
+    </section>
+
+    <!-- 5 -->
+    <section id="tools">
+      <h2>5. 它能做什么</h2>
+      <p>Agent 的能力边界就是下面这些工具，每个工具只做一件原子的事：</p>
+      <table>
+        <thead><tr><th>工具</th><th>作用</th><th>是否改动文件</th></tr></thead>
+        <tbody>
+          <tr><td><code>read_file</code></td><td>读取文本文件（带行号，支持分段读）</td><td>否</td></tr>
+          <tr><td><code>list_dir</code></td><td>查看目录结构</td><td>否</td></tr>
+          <tr><td><code>glob_search</code></td><td>按文件名模式找文件，例如 <code>**/*.py</code></td><td>否</td></tr>
+          <tr><td><code>grep_search</code></td><td>按内容搜索，返回「文件:行号: 内容」</td><td>否</td></tr>
+          <tr><td><code>edit_file</code></td><td>对已有文件做精确片段替换（推荐，不会误伤没让动的地方）</td><td>是</td></tr>
+          <tr><td><code>write_file</code></td><td>新建文件，或整体覆盖</td><td>是</td></tr>
+          <tr><td><code>run_command</code></td><td>执行命令（<strong>默认关闭</strong>，需显式开启）</td><td>视命令而定</td></tr>
+        </tbody>
+      </table>
+      <p class="doc-note">
+        改文件前有一道硬约束：<strong>必须先读过原文件</strong>。所以「没读就改」会被直接拒绝，
+        这是为了防止模型凭猜测改坏代码。
+      </p>
+    </section>
+
+    <!-- 6 -->
+    <section id="safety">
+      <h2>6. 安全边界与回滚</h2>
+
+      <h3>三道闸</h3>
+      <ol class="doc-steps">
+        <li><strong>路径沙箱</strong>：所有路径都解析成绝对路径后校验，必须在工作区之内。
+          用 <code>../</code> 或写绝对路径想溜出去，会被直接拒绝并记一次违规。</li>
+        <li><strong>敏感文件拦截</strong>：<code>.env</code>、<code>.git/</code>、<code>*.pem</code>、<code>*.key</code>、
+          <code>.changagent/</code> 等一律不可读不可写。</li>
+        <li><strong>写前备份</strong>：任何覆盖或修改前，原文件都会先复制一份。</li>
+      </ol>
+
+      <h3>改动怎么回滚</h3>
+      <p>每次写操作都会在运行目录留下原文件副本，目录结构是：</p>
+      <pre><code>&lt;工作区&gt;/.changagent/backups/&lt;时间戳&gt;/&lt;原文件相对路径&gt;</code></pre>
+      <p>回滚就是把备份复制回原位。例如在 PowerShell 里：</p>
+      <pre><code># 先看看有哪些时间点
+Get-ChildItem .changagent\backups
+
+# 把某个时间点的备份整体还原（示例时间戳）
+Copy-Item .changagent\backups\20260918-143055\* . -Recurse -Force</code></pre>
+
+      <h3>关于人工确认</h3>
+      <p>命令行模式下，每次写文件前会先展示改动内容并询问是否继续。而<strong>网页是单向事件流，无法暂停等你点确认</strong>，
+        所以真实模式需要设置：</p>
+      <pre><code>CHANG_AGENT_AUTO_APPROVE=true</code></pre>
+      <p class="doc-warn">
+        这个开关的含义是：<strong>你点击「运行」就等于授权本次改动</strong>。
+        它不会跳过沙箱和备份，但不会逐次问你。如果你的任务涉及重要文件，建议先备份整个目录，或改用命令行逐次确认。
+      </p>
+    </section>
+
+    <!-- 7 -->
+    <section id="config">
+      <h2>7. 配置项一览</h2>
+      <p>全部写在项目根的 <code>.env</code> 里（可从 <code>.env.example</code> 复制）。
+        优先级：环境变量 &gt; <code>.env</code> &gt; 代码默认值。</p>
+      <table>
+        <thead><tr><th>变量</th><th>默认值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>CHANG_AGENT_API_KEY</code></td><td>空</td><td>模型密钥，必填（真实模式）</td></tr>
+          <tr><td><code>CHANG_AGENT_BASE_URL</code></td><td><code>https://api.deepseek.com/v1</code></td><td>任意 OpenAI 兼容端点</td></tr>
+          <tr><td><code>CHANG_AGENT_MODEL</code></td><td><code>deepseek-chat</code></td><td>模型名，必须支持 Function Calling</td></tr>
+          <tr><td><code>CHANG_AGENT_TEMPERATURE</code></td><td><code>0</code></td><td>编码任务建议 0，保证稳定</td></tr>
+          <tr><td><code>CHANG_AGENT_TIMEOUT</code></td><td><code>120</code></td><td>单次模型请求超时（秒）</td></tr>
+          <tr><td><code>CHANG_AGENT_MAX_RETRIES</code></td><td><code>3</code></td><td>失败重试次数（指数退避）</td></tr>
+          <tr><td><code>CHANG_AGENT_WORKSPACE</code></td><td><code>examples/demo_workspace</code></td><td>工作区（沙箱根目录）</td></tr>
+          <tr><td><code>CHANG_AGENT_MAX_STEPS</code></td><td><code>25</code></td><td>单任务最大步数，防无限循环</td></tr>
+          <tr><td><code>CHANG_AGENT_TOKEN_BUDGET</code></td><td><code>32000</code></td><td>上下文预算，超出自动压缩</td></tr>
+          <tr><td><code>CHANG_AGENT_ENABLE_SHELL</code></td><td><code>false</code></td><td>是否提供 <code>run_command</code></td></tr>
+          <tr><td><code>CHANG_AGENT_AUTO_APPROVE</code></td><td><code>false</code></td><td>是否跳过逐次写入确认</td></tr>
+          <tr><td><code>CHANG_AGENT_BACKUP</code></td><td><code>true</code></td><td>写入前是否备份</td></tr>
+          <tr><td><code>CHANG_AGENT_WEB_MODE</code></td><td><code>demo</code></td><td><code>demo</code> 或 <code>live</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 8 -->
+    <section id="faq">
+      <h2>8. 常见问题</h2>
+
+      <h3>点了运行没反应，或者提示"未配置 API Key"</h3>
+      <p>检查是否把 <code>.env.example</code> 复制成了 <code>.env</code>（模板文件本身不会被读取），
+        以及 <code>CHANG_AGENT_API_KEY</code> 是否填了真实值。</p>
+
+      <h3>提示 401 / 404</h3>
+      <p>401 是密钥无效或过期；404 通常是模型名或 Base URL 写错了。
+        错误信息里会带上当前使用的模型名和端点，对照配置改即可。</p>
+
+      <h3>提示 429</h3>
+      <p>触发限流或额度不足。稍等重试，或换个模型。</p>
+
+      <h3>页面左侧文件树是空的</h3>
+      <p>工作区目录不存在，或里面确实没有文件。检查 <code>CHANG_AGENT_WORKSPACE</code> 指向的路径。
+        注意以 <code>.</code> 开头的文件和依赖目录（<code>node_modules</code>、<code>.venv</code> 等）不会被展示。</p>
+
+      <h3>Agent 卡住不动了</h3>
+      <p>单步默认最多等 120 秒，超时会自动重试再报错。如果长时间没动静，可以直接点「停止」。</p>
+
+      <h3>同一个工具连续失败三次就中断了</h3>
+      <p>这是内置的熔断保护，避免模型反复用错工具空烧额度。
+        通常说明目标文件不存在、路径写错了。检查工作区状态后重新下指令即可。</p>
+
+      <h3>端口被占用</h3>
+      <p>启动口会自动顺延到下一个可用端口，并在终端告诉你实际端口。</p>
+    </section>
+
+    <!-- 9 -->
+    <section id="layout">
+      <h2>9. 目录与产物</h2>
+      <pre><code>畅agent/
+├─ run.py                  启动口（一条命令起服务）
+├─ .env                    你的配置（已被 .gitignore 忽略）
+├─ .env.example            配置模板
+├─ docs/                   设计、工具、提示词、Web 四份文档
+├─ changagent/
+│  ├─ config.py            配置解析
+│  ├─ cli.py               命令行入口
+│  ├─ llm/                 模型客户端与消息结构
+│  ├─ tools/               工具实现与注册表
+│  ├─ core/                主循环、沙箱、上下文压缩、会话记录
+│  ├─ prompts/             system / tool_guide 提示词
+│  ├─ ui/                  终端渲染
+│  └─ web/                 服务端与静态页面
+└─ examples/demo_workspace 默认演示工作区</code></pre>
+
+      <p>运行后在工作区里会多出一个运行目录：</p>
+      <pre><code>&lt;工作区&gt;/.changagent/
+├─ sessions/&lt;时间戳&gt;-&lt;id&gt;.json   完整会话记录（任务、每步工具调用、结果）
+├─ backups/&lt;时间戳&gt;/&lt;相对路径&gt;   写入前的原文件备份
+└─ state.json                    最近一次会话的指针</code></pre>
+      <p class="doc-dim">
+        这些文件是纯文本 JSON，可以直接翻看 Agent 到底做了哪些操作、每一步花了多久。
+      </p>
+    </section>
+
+    <footer class="doc-foot">
+      <p>
+        <a href="/">← 返回工作台</a>
+        <span class="doc-dim">　·　设计细节见项目 <code>docs/</code> 目录</span>
+      </p>
+    </footer>
+
+  </article>
+</div>
+
+<script>
+  // 说明页只做一件事：把当前模式显示出来，方便对照正文
+  fetch('/api/state')
+    .then((res) => res.json())
+    .then((data) => {
+      const badge = document.getElementById('mode-badge');
+      const live = data.mode === 'live';
+      badge.textContent = live ? '真实模式' : '演示模式';
+      badge.classList.toggle('is-live', live);
+      badge.title = '模型：' + (data.model || '未配置');
+    })
+    .catch(() => {
+      document.getElementById('mode-badge').textContent = '未连接';
+    });
+</script>
+</body>
+</html>

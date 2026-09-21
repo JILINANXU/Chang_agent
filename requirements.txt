@@ -1,0 +1,11 @@
+# 畅Agent 运行依赖
+# 安装：pip install -r requirements.txt
+
+# --- 内核 ---
+openai>=1.30.0          # OpenAI 兼容协议的模型客户端（Function Calling）
+python-dotenv>=1.0.1    # 读取 .env 配置
+rich>=13.7.0            # 终端渲染：思考流、工具卡片、diff 高亮
+
+# --- Web 界面（python run.py 启动） ---
+fastapi>=0.110.0        # Web 服务与静态页面托管
+uvicorn>=0.29.0         # ASGI 服务器（用纯 Python 版，避免 Windows 下的编译依赖）

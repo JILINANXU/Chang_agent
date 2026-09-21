@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "changagent"
+version = "0.1.0"
+description = "畅Agent：一个用 Python 实现的本地编码智能体，根据自然语言提示读取与修改文件"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "openai>=1.30.0",
+    "python-dotenv>=1.0.1",
+    "rich>=13.7.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+changagent = "changagent.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["changagent*"]
+
+[tool.setuptools.package-data]
+changagent = ["prompts/*.md", "web/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
